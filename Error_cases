@@ -1,0 +1,37 @@
+# For evaluator 
+
+def process_expression(expr):
+    global tokens, pos
+
+    # Stage 1: tokenize and parse
+    try:
+        tokens = tokenize(expr)
+        pos = 0
+
+        tree = parse_expression()
+
+        if current_token() is None or current_token()[0] != "END":
+            raise ValueError("Extra input after valid expression")
+
+    # the 3@4 case
+    except Exception:
+        return {
+            "input": expr,
+            "tree": "ERROR",
+            "tokens": "ERROR",
+            "result": "ERROR"
+        }
+
+    # Stage 2: evaluate
+    try:
+        result = evaluate_tree(tree)
+    except Exception:
+        result = "ERROR"
+
+    # still keep tokens and tree
+    return {
+        "input": expr,
+        "tree": to_tree_string(tree),
+        "tokens": tokens_to_string(tokens),
+        "result": result
+    }
