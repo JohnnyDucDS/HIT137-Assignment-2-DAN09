@@ -1,14 +1,3 @@
-"""
-GROUP: DANALA 09
-MEMBERS:
-PHUONG VY HO,     ID: S395396
-DUC NGHIA NGUYEN,     ID: S397293
-MD TAMIM MAHMUD HAWLADER,     ID: S400472
-THAT QUOC THIEN TON,      ID: S404022
-
-"""
-
-
 
 import os
 
@@ -55,7 +44,7 @@ def tokens_to_string(tokens):
 
 
 def tokenize(expr):
-    # breaks expression string into typed tokens
+    #Break the original expression into tokens.
     raw_tokens = []
     number = ""
     dot_count = 0
@@ -64,7 +53,7 @@ def tokenize(expr):
         if ch.isdigit():
             number += ch
 
-        elif ch == ".":     # for decimal
+        elif ch == ".":
             number += ch
             dot_count += 1
 
@@ -72,33 +61,45 @@ def tokenize(expr):
                 raise ValueError("Invalid number")
 
         else:
-            # flush buffered digits as a NUM token
+            # Store the number collected so far
             if number != "":
-                if number == ".":      # in case e.g:  3. + 5
+                if number == ".":
                     raise ValueError("Invalid number")
-                raw_tokens.append(("NUM", format_number(float(number))))
+
+                raw_tokens.append(
+                    ("NUM", format_number(float(number)))
+                )
+
                 number = ""
-                dot_count = 0       # done one number
+                dot_count = 0
 
             if ch in "+-*/":
                 raw_tokens.append(("OP", ch))
+
             elif ch == "(":
                 raw_tokens.append(("LPAREN", ch))
+
             elif ch == ")":
                 raw_tokens.append(("RPAREN", ch))
-            elif ch == " ":
+
+            elif ch.isspace():
+                # Accept spaces, tabs and other whitespace
                 continue
+
             else:
                 raise ValueError(f"Invalid character: {ch}")
 
-    # flush last number if expression ends with a digit
+    # Store the final number
     if number != "":
         if number == ".":
             raise ValueError("Invalid number")
-        raw_tokens.append(("NUM", format_number(float(number))))
 
-    # insert implicit * and append END sentinel
-    return add_implicit_multiplication(raw_tokens) + [("END", "")]
+        raw_tokens.append(
+            ("NUM", format_number(float(number)))
+        )
+
+    raw_tokens.append(("END", ""))
+    return raw_tokens
 
 
 def add_implicit_multiplication(raw_tokens):
