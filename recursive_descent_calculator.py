@@ -310,7 +310,7 @@ def process_expression(expr):
     }
 
 
-def evaluate_file(input_path):
+def evaluate_file(input_path: str) -> list[dict]:
     # reads each non-blank line, processes it, writes output next to input file
     results = []
 
