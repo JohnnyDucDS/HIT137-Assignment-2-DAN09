@@ -104,28 +104,30 @@ def tokenize(expr):
 
 def add_implicit_multiplication(raw_tokens):
     # inserts "*" where implied, e.g. "2(3)" -> "2 * (3)"
-    if not raw_tokens:
-        return raw_tokens
+  tokens_without_end = raw_tokens[:-1]
+    parser_tokens = []
 
-    result = []
+    # These token combinations imply multiplication
+    valid_pairs = {
+        ("NUM", "LPAREN"),       # 3(4)
+        ("RPAREN", "NUM"),       # (3)4
+        ("RPAREN", "LPAREN")     # (3)(4)
+    }
 
-    for i in range(len(raw_tokens) - 1):
-        current_token = raw_tokens[i]
-        next_token = raw_tokens[i + 1]
+    for index, current_token in enumerate(tokens_without_end):
+        parser_tokens.append(current_token)
 
-        result.append(current_token)
+        if index < len(tokens_without_end) - 1:
+            next_token = tokens_without_end[index + 1]
 
-        current_type = current_token[0]
-        next_type = next_token[0]
+            current_type = current_token[0]
+            next_type = next_token[0]
 
-        left_ok = current_type in ("NUM", "RPAREN")
-        right_ok = next_type in ("NUM", "LPAREN")
+            if (current_type, next_type) in valid_pairs:
+                parser_tokens.append(("OP", "*"))
 
-        if left_ok and right_ok:    # satisfy with implicit multiplication
-            result.append(("OP", "*"))
-
-    result.append(raw_tokens[-1])
-    return result
+    parser_tokens.append(("END", ""))
+    return parser_tokens
 
 
 def current_token():
