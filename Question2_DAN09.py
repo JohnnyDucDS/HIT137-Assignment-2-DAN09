@@ -254,18 +254,13 @@ def evaluate_tree(node):
 def process_expression(expr):
     global tokens, pos
 
-    # stage 1: tokenize + parse — any error marks all fields as ERROR
+    # Stage 1: Tokenization
     try:
-        tokens = tokenize(expr)
-        pos = 0
+        raw_tokens = tokenize(expr)
 
-        tree = parse_expression()
-
-        # leftover tokens = malformed input, e.g. "1 + 2 3"
-        if current_token() is None or current_token()[0] != "END":
-            raise ValueError("Extra input after valid expression")
-
-    except Exception:
+    except (ValueError, OverflowError):
+        # Invalid character or invalid number
+        # Example: 3 @ 5
         return {
             "input": expr,
             "tree": "ERROR",
@@ -273,31 +268,46 @@ def process_expression(expr):
             "result": "ERROR"
         }
 
-    # stage 2: evaluate — tree/tokens still shown even if eval fails (e.g. div by zero)
+    # Tokenization succeeded, so save the original tokens
+    token_string = tokens_to_string(raw_tokens)
+
+    # Stage 2: Parsing
+    try:
+        # Parser receives a separate list containing virtual *
+        tokens = add_implicit_multiplication(raw_tokens)
+        pos = 0
+
+        tree = parse_expression()
+
+        # Anything remaining before END means invalid syntax
+        if current_token() is None or current_token()[0] != "END":
+            raise ValueError("Extra input after expression")
+
+    except ValueError:
+        # Syntax is invalid, but tokenization succeeded
+        # Example: 3 +
+        return {
+            "input": expr,
+            "tree": "ERROR",
+            "tokens": token_string,
+            "result": "ERROR"
+        }
+
+    # Stage 3: Evaluation
     try:
         result = evaluate_tree(tree)
-    except Exception:
+
+    except (ZeroDivisionError, ValueError):
+        # Tree and tokens remain valid
+        # Example: 1 / 0
         result = "ERROR"
 
     return {
         "input": expr,
         "tree": to_tree_string(tree),
-        "tokens": tokens_to_string(tokens),
+        "tokens": token_string,
         "result": result
     }
-
-
-def write_output_file(output_path, results):
-    # writes results to file, blank line between each entry
-    with open(output_path, "w", encoding="utf-8") as file:
-        for index, item in enumerate(results):
-            file.write(f"Input: {item['input']}\n")
-            file.write(f"Tree: {item['tree']}\n")
-            file.write(f"Tokens: {item['tokens']}\n")
-            file.write(f"Result: {format_result(item['result'])}\n")
-
-            if index != len(results) - 1:
-                file.write("\n")
 
 
 def evaluate_file(input_path):
