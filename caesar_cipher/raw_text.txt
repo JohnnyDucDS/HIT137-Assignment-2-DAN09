@@ -1,0 +1,5 @@
+Hello, this is a sample text.
+
+Hopefully you will be enjoy this small repo ^^
+
+Thank you!
