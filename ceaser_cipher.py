@@ -1,13 +1,3 @@
-"""
-GROUP: DANALA 09
-MEMBERS:
-PHUONG VY HO,     ID: S395396
-DUC NGHIA NGUYEN,     ID: S397293
-MD TAMIM MAHMUD HAWLADER,     ID: S400472
-THAT QUOC THIEN TON,      ID: S404022
-
-"""
-
 
 def encrypt_text(shift1, shift2):
     result = ""
